@@ -8,6 +8,11 @@ import java.util.Map;
 public class RaceResultsService {
 
     private Map<RaceCategory, Collection<Client>> clientsMap = new HashMap<>();
+    private Logger logger;
+
+    public RaceResultsService(Logger logger) {
+        this.logger = logger;
+    }
 
     public void addSubscriber(Client client, RaceCategory raceCategory) {
         Collection<Client> clients = clientsMap.computeIfAbsent(raceCategory, k -> new HashSet<>());
@@ -15,6 +20,8 @@ public class RaceResultsService {
     }
 
     public void send(Message message, RaceCategory raceCategory) {
+        logger.log(message);
+
         Collection<Client> clients = clientsMap.get(raceCategory);
         if (clients == null) {
             return;

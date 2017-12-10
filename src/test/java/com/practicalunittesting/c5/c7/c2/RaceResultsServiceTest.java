@@ -2,13 +2,12 @@ package com.practicalunittesting.c5.c7.c2;
 
 import org.junit.Test;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class RaceResultsServiceTest {
 
-    private RaceResultsService raceResults = new RaceResultsService();
+    private Logger logger = mock(Logger.class);
+    private RaceResultsService raceResults = new RaceResultsService(logger);
 
     private Message horseMessage = mock(Message.class);
     private Message f1Message = mock(Message.class);
@@ -29,6 +28,7 @@ public class RaceResultsServiceTest {
     public void subscribedClientShouldReceiveSelectedCategoryMessage() {
         raceResults.addSubscriber(clientA, RaceCategory.HORSE);
         raceResults.addSubscriber(clientA, RaceCategory.F1);
+
         raceResults.send(horseMessage, RaceCategory.HORSE);
         raceResults.send(f1Message, RaceCategory.F1);
         raceResults.send(boatMessage, RaceCategory.BOAT);
@@ -42,6 +42,7 @@ public class RaceResultsServiceTest {
     public void allSubscribedClientsShouldReceiveMessages() {
         raceResults.addSubscriber(clientA, RaceCategory.HORSE);
         raceResults.addSubscriber(clientB, RaceCategory.HORSE);
+
         raceResults.send(horseMessage, RaceCategory.HORSE);
 
         verify(clientA).receive(horseMessage);
@@ -52,6 +53,7 @@ public class RaceResultsServiceTest {
     public void shouldSendOnlyOneMessageToMultiSubscriber() {
         raceResults.addSubscriber(clientA, RaceCategory.HORSE);
         raceResults.addSubscriber(clientA, RaceCategory.HORSE);
+
         raceResults.send(horseMessage, RaceCategory.HORSE);
 
         verify(clientA).receive(horseMessage);
@@ -69,6 +71,11 @@ public class RaceResultsServiceTest {
 
     @Test
     public void eachMessageShouldBeLogged() {
+        raceResults.send(horseMessage, RaceCategory.HORSE);
+        raceResults.send(horseMessage, RaceCategory.F1);
+        raceResults.send(f1Message, RaceCategory.BOAT);
 
+        verify(logger, times(2)).log(horseMessage);
+        verify(logger).log(f1Message);
     }
 }
