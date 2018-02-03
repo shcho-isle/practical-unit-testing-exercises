@@ -7,6 +7,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Date;
+import java.util.NoSuchElementException;
 
 import static org.mockito.Mockito.*;
 
@@ -27,6 +28,8 @@ public class RaceResultsServiceTest {
     @Test
     public void notSubscribedClientShouldNotReceiveMessage() {
         raceResults.send(horseMessage, RaceCategory.HORSE);
+        raceResults.send(horseMessage, RaceCategory.HORSE);
+        raceResults.send(horseMessage, RaceCategory.F1);
 
         verify(clientA, never()).receive(horseMessage);
         verify(clientB, never()).receive(horseMessage);
@@ -38,11 +41,14 @@ public class RaceResultsServiceTest {
         raceResults.addSubscriber(clientA, RaceCategory.F1);
 
         raceResults.send(horseMessage, RaceCategory.HORSE);
+        raceResults.send(horseMessage, RaceCategory.HORSE);
+        raceResults.send(f1Message, RaceCategory.F1);
         raceResults.send(f1Message, RaceCategory.F1);
         raceResults.send(boatMessage, RaceCategory.BOAT);
+        raceResults.send(boatMessage, RaceCategory.BOAT);
 
-        verify(clientA).receive(horseMessage);
-        verify(clientA).receive(f1Message);
+        verify(clientA, times(2)).receive(horseMessage);
+        verify(clientA, times(2)).receive(f1Message);
         verify(clientA, never()).receive(boatMessage);
     }
 
@@ -52,9 +58,11 @@ public class RaceResultsServiceTest {
         raceResults.addSubscriber(clientB, RaceCategory.HORSE);
 
         raceResults.send(horseMessage, RaceCategory.HORSE);
+        raceResults.send(horseMessage, RaceCategory.HORSE);
+        raceResults.send(horseMessage, RaceCategory.HORSE);
 
-        verify(clientA).receive(horseMessage);
-        verify(clientB).receive(horseMessage);
+        verify(clientA, times(3)).receive(horseMessage);
+        verify(clientB, times(3)).receive(horseMessage);
     }
 
     @Test
@@ -91,5 +99,11 @@ public class RaceResultsServiceTest {
         verify(logger).log(date1, horseMessage);
         verify(logger).log(date2, horseMessage);
         verify(logger).log(date3, f1Message);
+    }
+
+    @Test(expected = NoSuchElementException.class)
+    public void testUnsubscribeWithoutSubscription() {
+        raceResults.addSubscriber(clientB, RaceCategory.BOAT);
+        raceResults.removeSubscriber(clientA, RaceCategory.BOAT);
     }
 }

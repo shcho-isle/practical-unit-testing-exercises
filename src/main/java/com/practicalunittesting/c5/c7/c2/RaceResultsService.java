@@ -31,10 +31,9 @@ public class RaceResultsService {
 
     public void removeSubscriber(Client client, RaceCategory raceCategory) {
         Collection<Client> clients = clientsMap.get(raceCategory);
-        if (clients == null) {
-            return;
-        }
 
-        clients.remove(client);
+        if (clients == null || !clients.remove(client)) {
+            throw new NoSuchElementException();
+        }
     }
 }
