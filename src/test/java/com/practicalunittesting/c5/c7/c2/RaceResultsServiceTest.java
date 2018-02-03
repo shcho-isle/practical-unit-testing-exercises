@@ -1,12 +1,20 @@
 package com.practicalunittesting.c5.c7.c2;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
+import java.util.Date;
 
 import static org.mockito.Mockito.*;
 
+@PrepareForTest(RaceResultsService.class)
+@RunWith(PowerMockRunner.class)
 public class RaceResultsServiceTest {
 
-    private Logger logger = mock(Logger.class);
+    private Logger logger = PowerMockito.mock(Logger.class);
     private RaceResultsService raceResults = new RaceResultsService(logger);
 
     private Message horseMessage = mock(Message.class);
@@ -70,12 +78,18 @@ public class RaceResultsServiceTest {
     }
 
     @Test
-    public void eachMessageShouldBeLogged() {
+    public void eachMessageShouldBeLogged() throws Exception {
+        Date date1 = mock(Date.class);
+        Date date2 = mock(Date.class);
+        Date date3 = mock(Date.class);
+        PowerMockito.whenNew(Date.class).withNoArguments().thenReturn(date1).thenReturn(date2).thenReturn(date3);
+
         raceResults.send(horseMessage, RaceCategory.HORSE);
         raceResults.send(horseMessage, RaceCategory.F1);
         raceResults.send(f1Message, RaceCategory.BOAT);
 
-        verify(logger, times(2)).log(horseMessage);
-        verify(logger).log(f1Message);
+        verify(logger).log(date1, horseMessage);
+        verify(logger).log(date2, horseMessage);
+        verify(logger).log(date3, f1Message);
     }
 }

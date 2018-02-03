@@ -1,9 +1,6 @@
 package com.practicalunittesting.c5.c7.c2;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 public class RaceResultsService {
 
@@ -20,7 +17,7 @@ public class RaceResultsService {
     }
 
     public void send(Message message, RaceCategory raceCategory) {
-        logger.log(message);
+        logger.log(new Date(), message);
 
         Collection<Client> clients = clientsMap.get(raceCategory);
         if (clients == null) {
